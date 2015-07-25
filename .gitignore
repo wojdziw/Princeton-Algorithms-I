@@ -9,3 +9,5 @@ Week2Project/*
 checkstyle-5.5/
 findbugs-2.0.3/*
 stdlib.jar
+*.class
+*.idea
