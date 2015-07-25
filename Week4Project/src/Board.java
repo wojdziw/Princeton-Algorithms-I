@@ -3,8 +3,8 @@ import java.util.List;
 
 public class Board {
 
-    private int[][] blocks;
-    private int N;
+    private final int[][] blocks;
+    private final int N;
 
     public Board(int[][] blocks)           // construct a board from an N-by-N array of blocks
     // (where blocks[i][j] = block in row i, column j)

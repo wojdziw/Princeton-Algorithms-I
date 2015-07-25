@@ -1,14 +1,14 @@
-import java.util.HashSet;
-import java.util.Set;
-
 public class Solver {
 
     private int M = 0;
 
     private MinPQ<SearchNode> boards = new MinPQ<>();
-    private Set<Board> minima = new HashSet<>();
-    private Stack<SearchNode> solution = new Stack<>();
+    private MinPQ<SearchNode> twinBoards = new MinPQ<>();
+    private SearchNode minimum = new SearchNode();
+    private SearchNode dummy = new SearchNode();
+
     private int minMoves;
+    private boolean isSolved = false;
 
 
     private class SearchNode implements Comparable<SearchNode>{
@@ -16,6 +16,8 @@ public class Solver {
         SearchNode previous;
         int priority;
         int moves;
+
+        public SearchNode(){}
 
         public SearchNode(Board board, int moves, SearchNode previous) {
             this.board = board;
@@ -35,14 +37,17 @@ public class Solver {
 
     public Solver(Board initial)           // find a solution to the initial board (using the A* algorithm)
     {
-        SearchNode dummy = new SearchNode(initial, 0, null);
+        dummy = new SearchNode(initial, 0, null);
 
         boards.insert(new SearchNode(initial, 0, dummy));
+        twinBoards.insert(new SearchNode(initial.twin(), 0, dummy));
 
-        SearchNode minimum = new SearchNode(initial, 0, dummy);
+        minimum = new SearchNode(initial, 0, dummy);
+        SearchNode twinMinimum = new SearchNode(initial.twin(), 0, dummy);
 
-        while (!minimum.board.isGoal()) {
+        while (!minimum.board.isGoal() && !twinMinimum.board.isGoal()) {
             minimum = boards.delMin();
+            twinMinimum = twinBoards.delMin();
 
             M++;
 
@@ -51,24 +56,42 @@ public class Solver {
                     boards.insert(new SearchNode(neighbor, minimum.moves+1, minimum));
                 }
             }
+
+            for (Board neighbor : twinMinimum.board.neighbors()) {
+                if (!neighbor.equals(twinMinimum.previous.board)) {
+                    twinBoards.insert(new SearchNode(neighbor, twinMinimum.moves+1, twinMinimum));
+                }
+            }
         }
+
+        if (minimum.board.isGoal()) isSolved = true;
 
         minMoves = minimum.moves;
 
+    }
+
+    public boolean isSolvable()            // is the initial board solvable?
+    {
+        return isSolved;
+    }
+    public int moves()                     // min number of moves to solve initial board; -1 if unsolvable
+    {
+        if (!isSolvable()) return -1;
+        return minMoves;
+    }
+    public Iterable<Board> solution()      // sequence of boards in a shortest solution; null if unsolvable
+    {
+        Stack<Board> solution = new Stack<>();
+
         while(minimum != dummy) {
-            solution.push(minimum);
+            solution.push(minimum.board);
             minimum = minimum.previous;
         }
 
+        if(!isSolvable()) return null;
 
+        return solution;
     }
-
-//    public boolean isSolvable()            // is the initial board solvable?
-    public int moves()                     // min number of moves to solve initial board; -1 if unsolvable
-    {
-        return minMoves;
-    }
-//    public Iterable<Board> solution()      // sequence of boards in a shortest solution; null if unsolvable
     public static void main(String[] args) // solve a slider puzzle (given below)
     {
 
@@ -81,14 +104,17 @@ public class Solver {
                 blocks[i][j] = in.readInt();
         Board initial = new Board(blocks);
 
-
-
         // solve the puzzle
         Solver solver = new Solver(initial);
-        System.out.println(solver.moves());
 
-        for (SearchNode searchNode : solver.solution) {
-            System.out.println(searchNode.board.toString());
+        // print solution to standard output
+        if (!solver.isSolvable())
+            StdOut.println("No solution possible");
+        else {
+            StdOut.println("Minimum number of moves = " + solver.moves());
+            for (Board board : solver.solution())
+                StdOut.println(board);
         }
+
     }
 }
