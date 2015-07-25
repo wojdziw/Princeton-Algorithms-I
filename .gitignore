@@ -1,0 +1,11 @@
+algs4.jar
+checkstyle.zip
+findbugs.zip
+bin/*
+drjava.jar
+hello/*
+Week1Project/*
+Week2Project/*
+checkstyle-5.5/
+findbugs-2.0.3/*
+stdlib.jar
