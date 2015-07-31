@@ -111,6 +111,9 @@ public class KdTree {
         double xDif = node.point.x() - target.x();
         double yDif = node.point.y() - target.y();
 
+        boolean isToLeft = target.x() < node.point.x();
+        boolean isToBottom = target.y() < node.point.y();
+
         double newDist = (xDif)*(xDif)+(yDif)*(yDif);
         if (newDist < minDist) {
             winner = node.point;
@@ -120,31 +123,48 @@ public class KdTree {
         if (goVertical) {
             double toSplittingLine = xDif*xDif;
 
-            if (Math.abs(toSplittingLine) <= minDist) {
-                if (toSplittingLine < 0) {
-                    if (node.left != null) winner = neighbor(winner, minDist, target, node.left, false);
-                }
-                if (toSplittingLine > 0) {
-                    if (node.right != null) winner = neighbor(winner, minDist, target, node.right, false);
-                }
-            } else {
+            if (isToLeft) {
                 if (node.left != null) winner = neighbor(winner, minDist, target, node.left, false);
+            }
+
+            if (!isToLeft) {
                 if (node.right != null) winner = neighbor(winner, minDist, target, node.right, false);
             }
+
+            minDist = (winner.x()-target.x())*(winner.x()-target.x())+(winner.y()-target.y())*(winner.y()-target.y());
+
+            if (toSplittingLine <= minDist) {
+                if (!isToLeft) {
+                    if (node.left != null) winner = neighbor(winner, minDist, target, node.left, false);
+                }
+
+                if (isToLeft) {
+                    if (node.right != null) winner = neighbor(winner, minDist, target, node.right, false);
+                }
+            }
+
 
         } else {
             double toSplittingLine = yDif*yDif;
 
-            if (Math.abs(toSplittingLine) <= minDist) {
-                if (toSplittingLine < 0) {
-                    if (node.left != null) winner = neighbor(winner, minDist, target, node.left, true);
+            if (isToBottom) {
+                if (node.left != null) winner = neighbor(winner, minDist, target, node.left, false);
+            }
+
+            if (!isToBottom) {
+                if (node.right != null) winner = neighbor(winner, minDist, target, node.right, false);
+            }
+
+            minDist = (winner.x()-target.x())*(winner.x()-target.x())+(winner.y()-target.y())*(winner.y()-target.y());
+
+            if (toSplittingLine <= minDist) {
+                if (!isToLeft) {
+                    if (node.left != null) winner = neighbor(winner, minDist, target, node.left, false);
                 }
-                if (toSplittingLine > 0) {
-                    if (node.right != null) winner = neighbor(winner, minDist, target, node.right, true);
+
+                if (isToLeft) {
+                    if (node.right != null) winner = neighbor(winner, minDist, target, node.right, false);
                 }
-            } else {
-                if (node.left != null) winner = neighbor(winner, minDist, target, node.left, true);
-                if (node.right != null) winner = neighbor(winner, minDist, target, node.right, true);
             }
         }
 
@@ -215,7 +235,7 @@ public class KdTree {
         kdTree.insert(new Point2D(0.4, 0.7));
         kdTree.insert(new Point2D(0.9, 0.6));
         kdTree.insert(new Point2D(0.1, 0.1));
-        kdTree.insert(new Point2D(1, 1));
+        kdTree.insert(new Point2D(0.7, 0.4));
 
         System.out.println(kdTree.contains(new Point2D(1, 0)));
 
@@ -224,13 +244,13 @@ public class KdTree {
         System.out.println(kdTree.size());
 
 
-//        for (Point2D point2D : kdTree.range(new RectHV(0,0,1.1, 1.1))) {
-//            System.out.println(point2D);
-//        }
-//
-//        System.out.println("nearest");
-//
-//        System.out.println(kdTree.nearest(new Point2D(1, 1)));
+        for (Point2D point2D : kdTree.range(new RectHV(0,0,1.1, 1.1))) {
+            System.out.println(point2D);
+        }
+
+        System.out.println("nearest");
+
+        System.out.println(kdTree.nearest(new Point2D(1, 1)));
 
 
 
